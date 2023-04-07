@@ -16,13 +16,14 @@ module aes_key_expand
 
 logic [31:0] temp [4*(Nr+1)];
 
+genvar i;
 generate
-    for (genvar i = 0; i < Nk; ++i) begin
+    for (i = 0; i < Nk; ++i) begin: temp_block
         always_comb
             temp[i] = key[32*i+:32];
     end
 
-    for (genvar i = Nk; i < 4*(Nr+1); ++i) begin
+    for (i = Nk; i < 4*(Nr+1); ++i) begin : temp_block2
         if (i % Nk == 0)
             always_comb
                 temp[i] = temp[i-Nk]
@@ -38,7 +39,7 @@ generate
 endgenerate
 
 generate
-    for (genvar i = 0; i <= Nr; ++i) begin
+    for (i = 0; i <= Nr; ++i) begin : k_sch_block
         always_comb
             k_sch[i] = {temp[4*i+3], temp[4*i+2], temp[4*i+1], temp[4*i+0]};
     end
