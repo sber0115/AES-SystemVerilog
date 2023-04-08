@@ -3,8 +3,8 @@
 // Copyright (c) 2013, Intel Corporation
 // All rights reserved
 
-`include "flops.svh"
-`include "aes.svh"
+`include "include/flops.svh"
+`include "include/aes.svh"
 
 module aes_inv_cipher
 #(
@@ -37,8 +37,9 @@ always_comb valid = valids[0];
 `DFFEN(istate[Nr], AddRoundKey(ct, k_sch[Nr]), load, clk)
 `DFF_ARN(valids[Nr], load, clk, rst_n, 1'b0)
 
+genvar i;
 generate
-    for (genvar i = (Nr-1); i > 0; --i) begin: round
+    for (i = (Nr-1); i > 0; --i) begin: round
         always_comb is_row[i] = InvShiftRows(istate[i+1]);
         always_comb is_box[i] = InvSubBytes(is_row[i]);
         always_comb ik_add[i] = AddRoundKey(is_box[i], k_sch[i]);

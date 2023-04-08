@@ -3,7 +3,7 @@
 // Copyright (c) 2013, Intel Corporation
 // All rights reserved
 
-`include "aes.svh"
+`include "include/aes.svh"
 
 module aes_key_expand
 #(

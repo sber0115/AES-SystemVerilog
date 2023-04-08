@@ -1,3 +1,6 @@
+`include "include/aes.svh"
+`include "include/flops.svh"
+
 /* Encrypt Args
  * Param Nk - Number of 32-bit words comprising the Cipher Key. For this standard, Nk = 4, 6, or 8. 
  * Param Nr - Number of rounds, which is a function of Nk and Nb (which is fixed). For this standard, Nr = 10, 12, or 14. 
