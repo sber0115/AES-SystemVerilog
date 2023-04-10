@@ -34,6 +34,9 @@ always_comb ct = state[Nr];
 always_comb valid = valids[Nr];
 
 `DFFEN(state[0], AddRoundKey(pt, k_sch[0]), load, clk)
+
+//flop a valid signal, so that it propogates across Nr cycles
+//after Nr cycles, the output valid signal of this module will be asserted
 `DFF_ARN(valids[0], load, clk, rst_n, 1'b0)
 
 genvar i;
@@ -47,6 +50,7 @@ generate
     end: round
 endgenerate
 
+//no MixColumns on the last round
 always_comb s_box[Nr] = SubBytes(state[Nr-1]);
 always_comb s_row[Nr] = ShiftRows(s_box[Nr]);
 `DFFEN(state[Nr], AddRoundKey(s_row[Nr], k_sch[Nr]), valids[Nr-1], clk)

@@ -23,13 +23,33 @@
  * Output valid
  */
 
+
+ //divides the fclk by 4
+module clk_div(input logic fclk, output logic sclk, input logic reset_n);
+
+  logic [3:0] div;
+
+  always_ff @(posedge fclk, negedge reset_n) begin
+    if (~reset_n) begin
+      div <= 4'd1;
+    end 
+    else begin
+      div <= {div[2:0], div[3]};
+    end
+  end
+
+  assign sclk = div[3];
+
+endmodule : clk_div
+
+
  module top #(parameter Nk = 4,
               parameter Nr = Nk + 6)
             (output logic[7:0] LEDR,
             input logic CLOCK_50, 
             input  logic [7:0] SW);
 
-    logic encrypt_load, decyrpt_load, rst_n, encrypt_valid, decrypt_valid;
+    logic encrypt_load, decrypt_load, rst_n, encrypt_valid, decrypt_valid;
     
     logic [127:0] in, decrypted128, encrypted128, expected128;
 
@@ -37,26 +57,26 @@
 
     logic correctEnc, correctDec;
 
+    logic CLOCK_SLOW;
+
+    clk_div (.fclk(CLOCK_50), .sclk(CLOCK_SLOW), .reset_n(1'b1));
 
     always_comb begin
         in = 128'h00112233445566778899aabbccddeeff;
         key128 = 128'h000102030405060708090a0b0c0d0e0f;
         expected128 = 128'h69c4e0d86a7b0430d8cdb78070b4c55a;
-        correctEnc = (encrypted128 == expected128) ? 1'b1 : 1'b0;
-        
-        correctDec = (decrypted128 == in) ? 1'b1 : 1'b0;
 
+        correctEnc = (encrypted128 == expected128) ? 1'b1 : 1'b0;
+        correctDec = (decrypted128 == in) ? 1'b1 : 1'b0;
     end
 
     assign encrypt_load = SW[0];
     assign decrypt_load = SW[1];
     
-
-	assign LEDR[0] = (correctEnc && SW[0]) ? 1'b1 : 1'b0;
-	assign LEDR[1] = (correctDec && SW[1]) ? 1'b1 : 1'b0;
+	 assign LEDR[0] = (correctEnc && encrypt_valid) ? 1'b1 : 1'b0;
+	 assign LEDR[1] = (correctDec && decrypt_valid) ? 1'b1 : 1'b0;
      
-    
-    aes_encrypt #(Nk, Nr) encrypt_dut(.clk(CLOCK_50), .pt(in), .key(key128), .ct(encrypted128), .valid(encrypt_valid), .load(encrypt_load), .*);
-    aes_decrypt #(Nk, Nr) decrypt_dut(.clk(CLOCK_50), .ct(encrypted128), .key(key128), .pt(decrypted128), .valid(decrypt_valid), .load(decrypt_load), .*);
+    aes_encrypt #(Nk, Nr) encrypt_dut(.clk(CLOCK_SLOW), .rst_n(1'b1), .pt(in), .key(key128), .ct(encrypted128), .valid(encrypt_valid), .load(encrypt_load));
+    aes_decrypt #(Nk, Nr) decrypt_dut(.clk(CLOCK_SLOW), .rst_n(1'b1), .ct(encrypted128), .key(key128), .pt(decrypted128), .valid(decrypt_valid), .load(decrypt_load));
 
  endmodule: top
