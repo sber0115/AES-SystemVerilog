@@ -77,6 +77,6 @@ endmodule : clk_div
 	 assign LEDR[1] = (correctDec && decrypt_valid) ? 1'b1 : 1'b0;
      
     aes_encrypt #(Nk, Nr) encrypt_dut(.clk(CLOCK_SLOW), .rst_n(1'b1), .pt(in), .key(key128), .ct(encrypted128), .valid(encrypt_valid), .load(encrypt_load));
-    aes_decrypt #(Nk, Nr) decrypt_dut(.clk(CLOCK_SLOW), .rst_n(1'b1), .ct(encrypted128), .key(key128), .pt(decrypted128), .valid(decrypt_valid), .load(decrypt_load));
+    
 
  endmodule: top
